@@ -34,6 +34,7 @@
 #include "rplidar_cmd.h"
 #include "stddef.h"
 #include "cstddef"
+#include "uart_lib.h"
 
 struct RPLidarMeasurement
 {
@@ -55,13 +56,13 @@ public:
     ~RPLidar();
 
     // open the given serial interface and try to connect to the RPLIDAR
-    bool begin(HardwareSerial &serialobj);
+    bool begin(UART_HandleTypeDef *huart);
 
     // close the currently opened serial interface
     void end();
 
     // check whether the serial interface is opened
-    bool isOpen();
+    //bool isOpen();
 
     // ask the RPLIDAR for its health info
     u_result getHealth(rplidar_response_device_health_t & healthinfo, _u32 timeout = RPLIDAR_DEFAULT_TIMEOUT);
@@ -90,6 +91,6 @@ protected:
     u_result _waitResponseHeader(rplidar_ans_header_t * header, _u32 timeout);
 
 protected:
-    HardwareSerial * _bined_serialdev;
+    //HardwareSerial * _bined_serialdev;
     RPLidarMeasurement _currentMeasurement;
 };

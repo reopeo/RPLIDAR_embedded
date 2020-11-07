@@ -1,0 +1,11 @@
+RPLidar.cpp:34:1:RPLidar::RPLidar()	16	static
+RPLidar.cpp:43:1:RPLidar::~RPLidar()	16	static
+RPLidar.cpp:49:6:bool RPLidar::begin(UART_HandleTypeDef*)	16	static
+RPLidar.cpp:56:6:void RPLidar::end()	16	static
+RPLidar.cpp:74:10:u_result RPLidar::getHealth(rplidar_response_device_health_t&, _u32)	56	static
+RPLidar.cpp:122:10:u_result RPLidar::getDeviceInfo(rplidar_response_device_info_t&, _u32)	56	static
+RPLidar.cpp:167:10:u_result RPLidar::stop()	24	static
+RPLidar.cpp:175:10:u_result RPLidar::startScan(bool, _u32)	40	static
+RPLidar.cpp:206:10:u_result RPLidar::waitPoint(_u32)	48	static
+RPLidar.cpp:261:10:u_result RPLidar::_sendCommand(_u8, const void*, size_t)	40	static
+RPLidar.cpp:308:10:u_result RPLidar::_waitResponseHeader(rplidar_ans_header_t*, _u32)	48	static

@@ -1,0 +1,3 @@
+uart_lib.cpp:10:6:void Uart::begin(UART_HandleTypeDef*)	16	static
+uart_lib.cpp:15:15:unsigned char Uart::getc()	24	static
+uart_lib.cpp:22:6:void Uart::putc(unsigned char)	24	static

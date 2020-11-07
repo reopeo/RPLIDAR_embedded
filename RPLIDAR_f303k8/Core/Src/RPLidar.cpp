@@ -29,8 +29,9 @@
 
 #include "RPLidar.h"
 
+Uart serial;
+
 RPLidar::RPLidar()
-    : _bined_serialdev(NULL)
 {
     _currentMeasurement.distance = 0;
     _currentMeasurement.angle = 0;
@@ -45,32 +46,30 @@ RPLidar::~RPLidar()
 }
 
 // open the given serial interface and try to connect to the RPLIDAR
-bool RPLidar::begin(HardwareSerial &serialobj)
+bool RPLidar::begin(UART_HandleTypeDef *huart)
 {
-    if (isOpen()) {
-      end();
-    }
-    _bined_serialdev = &serialobj;
-    _bined_serialdev->end();
-    _bined_serialdev->begin(RPLIDAR_SERIAL_BAUDRATE);
+	serial.begin(huart);
+	return 0;
 }
 
 // close the currently opened serial interface
 void RPLidar::end()
 {
-    if (isOpen()) {
+/*    if (isOpen()) {
        _bined_serialdev->end();
        _bined_serialdev = NULL;
     }
+*/
 }
 
 
 // check whether the serial interface is opened
+/*
 bool RPLidar::isOpen()
 {
     return _bined_serialdev?true:false;
 }
-
+*/
 // ask the RPLIDAR for its health info
 u_result RPLidar::getHealth(rplidar_response_device_health_t & healthinfo, _u32 timeout)
 {
@@ -84,7 +83,7 @@ u_result RPLidar::getHealth(rplidar_response_device_health_t & healthinfo, _u32 
     u_result  ans;
 
 
-    if (!isOpen()) return RESULT_OPERATION_FAIL;
+    //if (!isOpen()) return RESULT_OPERATION_FAIL;
 
     {
         if (IS_FAIL(ans = _sendCommand(RPLIDAR_CMD_GET_DEVICE_HEALTH, NULL, 0))) {
@@ -105,7 +104,8 @@ u_result RPLidar::getHealth(rplidar_response_device_health_t & healthinfo, _u32 
         }
 
         while ((remainingtime=HAL_GetTick() - currentTs) <= timeout) {
-            int currentbyte = _bined_serialdev->read();
+            //int currentbyte = _bined_serialdev->read();
+        	int currentbyte = serial.getc();
             if (currentbyte < 0) continue;
 
             infobuf[recvPos++] = currentbyte;
@@ -128,7 +128,7 @@ u_result RPLidar::getDeviceInfo(rplidar_response_device_info_t & info, _u32 time
     rplidar_ans_header_t response_header;
     u_result  ans;
 
-    if (!isOpen()) return RESULT_OPERATION_FAIL;
+    //if (!isOpen()) return RESULT_OPERATION_FAIL;
 
     {
         if (IS_FAIL(ans = _sendCommand(RPLIDAR_CMD_GET_DEVICE_INFO,NULL,0))) {
@@ -149,7 +149,8 @@ u_result RPLidar::getDeviceInfo(rplidar_response_device_info_t & info, _u32 time
         }
 
         while ((remainingtime=HAL_GetTick() - currentTs) <= timeout) {
-            int currentbyte = _bined_serialdev->read();
+            //int currentbyte = _bined_serialdev->read();
+        	int currentbyte = serial.getc();
             if (currentbyte<0) continue;
             infobuf[recvPos++] = currentbyte;
 
@@ -165,7 +166,7 @@ u_result RPLidar::getDeviceInfo(rplidar_response_device_info_t & info, _u32 time
 // stop the measurement operation
 u_result RPLidar::stop()
 {
-    if (!isOpen()) return RESULT_OPERATION_FAIL;
+    //if (!isOpen()) return RESULT_OPERATION_FAIL;
     u_result ans = _sendCommand(RPLIDAR_CMD_STOP,NULL,0);
     return ans;
 }
@@ -175,7 +176,7 @@ u_result RPLidar::startScan(bool force, _u32 timeout)
 {
     u_result ans;
 
-    if (!isOpen()) return RESULT_OPERATION_FAIL;
+    //if (!isOpen()) return RESULT_OPERATION_FAIL;
 
     stop(); //force the previous operation to stop
 
@@ -212,7 +213,8 @@ u_result RPLidar::waitPoint(_u32 timeout)
    _u8 recvPos = 0;
 
    while ((remainingtime=HAL_GetTick() - currentTs) <= timeout) {
-        int currentbyte = _bined_serialdev->read();
+        //int currentbyte = _bined_serialdev->read();
+	    int currentbyte = serial.getc();
         if (currentbyte<0) continue;
 
         switch (recvPos) {
@@ -271,7 +273,9 @@ u_result RPLidar::_sendCommand(_u8 cmd, const void * payload, size_t payloadsize
     header->cmd_flag = cmd;
 
     // send header first
-    _bined_serialdev->write( (uint8_t *)header, 2);
+    //_bined_serialdev->write( (uint8_t *)header, 2);
+    serial.putc(header->syncByte );
+    serial.putc(header->cmd_flag );
 
     if (cmd & RPLIDAR_CMDFLAG_HAS_PAYLOAD) {
         checksum ^= RPLIDAR_CMD_SYNC_BYTE;
@@ -285,13 +289,16 @@ u_result RPLidar::_sendCommand(_u8 cmd, const void * payload, size_t payloadsize
 
         // send size
         _u8 sizebyte = payloadsize;
-        _bined_serialdev->write((uint8_t *)&sizebyte, 1);
+        //_bined_serialdev->write((uint8_t *)&sizebyte, 1);
+        serial.putc(sizebyte);
 
         // send payload
-        _bined_serialdev->write((uint8_t *)&payload, sizebyte);
+        //_bined_serialdev->write((uint8_t *)&payload, sizebyte);
+        //serial.putc(payload);
 
         // send checksum
-        _bined_serialdev->write((uint8_t *)&checksum, 1);
+        //_bined_serialdev->write((uint8_t *)&checksum, 1);
+        serial.putc(checksum);
 
     }
 
@@ -306,7 +313,8 @@ u_result RPLidar::_waitResponseHeader(rplidar_ans_header_t * header, _u32 timeou
     _u8 *headerbuf = (_u8*)header;
     while ((remainingtime=HAL_GetTick() - currentTs) <= timeout) {
 
-        int currentbyte = _bined_serialdev->read();
+        //int currentbyte = _bined_serialdev->read();
+    	int currentbyte = serial.getc();
         if (currentbyte<0) continue;
         switch (recvPos) {
         case 0:

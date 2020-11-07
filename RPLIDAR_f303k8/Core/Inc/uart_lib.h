@@ -10,7 +10,14 @@
 
 #include "main.h"
 
-unsigned char getc();
-void putc(unsigned char date);
+class Uart
+{
+public:
+	void begin(UART_HandleTypeDef *huart);
+	unsigned char getc();
+	void putc(unsigned char data);
 
+private:
+	UART_HandleTypeDef* phuart;
+};
 #endif /* INC_UART_LIB_H_ */

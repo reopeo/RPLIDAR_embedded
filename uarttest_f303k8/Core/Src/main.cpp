@@ -56,7 +56,7 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+Uart serial;
 /* USER CODE END 0 */
 
 /**
@@ -66,7 +66,7 @@ static void MX_USART2_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	unsigned char data = 'a';
+	serial.begin(&huart2);
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -99,10 +99,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  //data = getc();
-	  //putc(data);
-	  HAL_UART_Transmit(&huart2, &data, 1, 1000);
-	  //TODO motor_unit_ver0.6 no UART_HandleTypeDef huart2; korewatasuyatu
+	  serial.putc('a');
   }
   /* USER CODE END 3 */
 }
@@ -158,7 +155,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 38400;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
